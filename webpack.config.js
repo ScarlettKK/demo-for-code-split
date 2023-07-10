@@ -34,4 +34,57 @@ module.exports = {
         }),
     ],
     mode: "production",
-};
+    // 代码压缩、优化功能在optimization做
+    /**
+     * 下面功能：提取重复代码
+     * 如果多入口文件中都引用了同一份代码，我们不希望这份代码被打包到两个文件中，导致代码重复，体积更大。
+     * 我们需要提取多入口的重复代码，只打包生成一个 js 文件，其他文件引用它就好
+     */
+    /**
+     * 名词解析：Chunks 打包进来的资源，一个文件一个Chunk
+     *         bundle 打包后输出的资源
+     */
+    optimization: {
+        // 代码分割配置
+        splitChunks: {
+            chunks: "all", // 对所有模块都进行分割
+            // 下面的默认值一般不需要配置，写一个chunks: "all"激活即可
+            // 以下是默认值
+            // minSize: 20000, // 分割代码最小的大小 20kb
+            // minRemainingSize: 0, // 类似于minSize，最后确保提取的文件大小不能为0
+            // minChunks: 1, // 至少被引用的次数，满足条件才会代码分割
+            // maxAsyncRequests: 30, // 按需加载时并行加载的文件的最大数量，超过会合并文件
+            // 请求数量过多，服务器压力大
+            // maxInitialRequests: 30, // 入口js文件最大并行请求数量
+            // enforceSizeThreshold: 50000, // 超过50kb一定会单独打包（此时会忽略minRemainingSize、maxAsyncRequests、maxInitialRequests）
+            // cacheGroups: { // 组，哪些模块要打包到一个组，默认有两个组
+            //   defaultVendors: { // 组名
+            //     test: /[\\/]node_modules[\\/]/, // 需要打包到一起的模块
+            //     priority: -10, // 权重（越大越高）
+            //     reuseExistingChunk: true, // 如果当前 chunk 包含已从主 bundle 中拆分出的模块，则它将被重用，而不是生成新的模块
+            //   },
+            //   default: { // 其他没有写的配置会使用上面的默认值
+            //     minChunks: 2, // 这里的minChunks更大，至少用两次才会被打包到default中，覆盖掉上面的minChunks配置，只对当前组生效
+            //     priority: -20, // 优先级没有上面高
+            //     reuseExistingChunk: true,
+            //   },
+            // },
+            // 修改配置
+            cacheGroups: {
+                // 组，哪些模块要打包到一个组
+                // defaultVendors: { // 组名
+                //   test: /[\\/]node_modules[\\/]/, // 需要打包到一起的模块
+                //   priority: -10, // 权重（越大越高）
+                //   reuseExistingChunk: true, // 如果当前 chunk 包含已从主 bundle 中拆分出的模块，则它将被重用，而不是生成新的模块
+                // },
+                default: {
+                    // 其他没有写的配置会使用上面的默认值
+                    minSize: 0, // 我们定义的文件体积太小了，所以要改打包的最小文件体积
+                    minChunks: 2,
+                    priority: -20,
+                    reuseExistingChunk: true,
+                },
+            },
+        },
+    }
+}
